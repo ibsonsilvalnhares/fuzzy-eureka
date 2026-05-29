@@ -122,13 +122,3 @@ python bot.py
   ```env
   DISCORD_TOKEN=seu_token_aqui
   ```
-
-- Quer que eu adicione alguma funcionalidade específica?
-  - Sistema de níveis
-  - Moderação (ban, kick, mute)
-  - Música
-  - Economia (carteira)
-  - Tickets
-  - Slash Commands (moderna)
-
-É só falar o que você quer que eu melhore ou adicione no bot! 🚀
