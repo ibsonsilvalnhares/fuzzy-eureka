@@ -1,75 +1,66 @@
 import discord
 from discord.ext import commands
-import os
-from datetime import datetime
 
-# Configurações de Intents (necessário para o bot funcionar)
+TOKEN = "SEU_TOKEN"
+
 intents = discord.Intents.default()
-intents.message_content = True  # Permite ler o conteúdo das mensagens
-intents.members = True          # Opcional: para ver membros
+intents.message_content = True
+intents.members = True
 
-# Cria o bot com prefixo "!"
-bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Evento: Quando o bot ficar online
+# CATÁLOGO
+catalogo = {
+    "Netflix": "R$ 15",
+    "Spotify": "R$ 10",
+    "Disney+": "R$ 12"
+}
+
+@bot.command()
+async def catalogo(ctx):
+    texto = "**📦 Catálogo da Loja**\n\n"
+
+    for produto, preco in catalogo.items():
+        texto += f"• {produto} - {preco}\n"
+
+    await ctx.send(texto)
+
+@bot.command()
+async def comprar(ctx, *, produto):
+    await ctx.send(
+        f"✅ Pedido de **{produto}** registrado por {ctx.author.mention}"
+    )
+
+# COMANDOS ADM
+
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, membro: discord.Member, *, motivo="Sem motivo"):
+    await membro.ban(reason=motivo)
+    await ctx.send(f"🔨 {membro} foi banido.")
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, membro: discord.Member, *, motivo="Sem motivo"):
+    await membro.kick(reason=motivo)
+    await ctx.send(f"👢 {membro} foi expulso.")
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def limpar(ctx, quantidade: int):
+    await ctx.channel.purge(limit=quantidade + 1)
+    await ctx.send(
+        f"🧹 {quantidade} mensagens removidas.",
+        delete_after=5
+    )
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def anunciar(ctx, *, mensagem):
+    await ctx.send(f"📢 {mensagem}")
+
 @bot.event
 async def on_ready():
-    print(f"✅ Bot online como {bot.user}")
-    print(f"Servidores conectados: {len(bot.guilds)}")
-    
-    # Status personalizado
-    await bot.change_presence(
-        activity=discord.Game(name="!help | Bot feito por Ibson")
-    )
+    print(f"Bot conectado como {bot.user}")
 
-# Comando simples: Olá
-@bot.command(name="ola", aliases=["olá", "hello"])
-async def ola(ctx):
-    await ctx.send(f"👋 Olá, {ctx.author.mention}! Tudo bem?")
-
-# Comando: Ping
-@bot.command()
-async def ping(ctx):
-    latency = round(bot.latency * 1000)
-    await ctx.send(f"🏓 Pong! `{latency}ms`")
-
-# Comando: Info do servidor
-@bot.command()
-async def serverinfo(ctx):
-    guild = ctx.guild
-    embed = discord.Embed(
-        title=f"📊 {guild.name}",
-        color=discord.Color.blue(),
-        timestamp=datetime.utcnow()
-    )
-    embed.add_field(name="Membros", value=guild.member_count, inline=True)
-    embed.add_field(name="Criado em", value=guild.created_at.strftime("%d/%m/%Y"), inline=True)
-    embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
-    
-    await ctx.send(embed=embed)
-
-# Comando de ajuda personalizado
-@bot.command()
-async def help(ctx):
-    embed = discord.Embed(
-        title="📜 Comandos do Bot",
-        description="Aqui estão os comandos disponíveis:",
-        color=discord.Color.purple()
-    )
-    embed.add_field(name="!ola", value="Diz olá para você", inline=False)
-    embed.add_field(name="!ping", value="Mostra a latência do bot", inline=False)
-    embed.add_field(name="!serverinfo", value="Mostra informações do servidor", inline=False)
-    
-    await ctx.send(embed=embed)
-
-# ========================
-# RODAR O BOT
-# ========================
-
-if __name__ == "__main__":
-    TOKEN = os.getenv("DISCORD_TOKEN")  # Melhor usar variável de ambiente
-    
-    if not TOKEN:
-        TOKEN = input("🔑 Cole seu Token do Bot aqui: ")
-    
-    bot.run(TOKEN)
+bot.run(TOKEN)
